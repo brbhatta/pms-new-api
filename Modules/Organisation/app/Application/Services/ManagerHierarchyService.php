@@ -1,17 +1,21 @@
 <?php
 
-namespace Modules\Organisation\Policies;
+namespace Modules\Organisation\Application\Services;
 
+use Illuminate\Support\Collection;
+use Modules\Organisation\Application\Contracts\ManagerHierarchyServiceInterface;
+use Modules\Organisation\Http\Data\PostData;
+use Modules\Organisation\Http\Data\PostingData;
+use Modules\Organisation\Models\Post;
+use Modules\Organisation\Models\Posting;
 use Modules\User\Http\Data\UserData;
 use Modules\User\Models\User;
-use Modules\Organisation\Models\Posting;
-use Illuminate\Support\Collection;
 
-final readonly class ManagerHierarchyPolicy
+final readonly class ManagerHierarchyService implements ManagerHierarchyServiceInterface
 {
     public function __construct(
         private Posting $posting,
-        private User $user,
+        private Post $post
     ) {
     }
 
@@ -24,11 +28,11 @@ final readonly class ManagerHierarchyPolicy
     {
         $posting = $this->getActivePosting($userData);
 
-        if (!$posting || !$posting->post || !$posting->post->reports_to_post_id) {
+        if (!$posting || !$posting->post->reportsToPostId) {
             return collect();
         }
 
-        return $this->getActivePostingsForPostInUnit($posting->post->reports_to_post_id, $posting->organisation_unit_id)
+        return $this->getActivePostingsForPostInUnit($posting->post->reportsToPostId, $posting->organisationUnitId)
             ->pluck('user')
             ->filter()
             ->values()
@@ -38,30 +42,30 @@ final readonly class ManagerHierarchyPolicy
     /**
      * Return all managers up the reporting chain for the given user.
      * Returns a collection of users in order from nearest manager to top.
-     * @param  UserData  $user
+     * @param  UserData  $userData
      * @return Collection<UserData>
      */
-    public function allManagers(UserData $user): Collection
+    public function allManagers(UserData $userData): Collection
     {
         $managers = collect();
 
-        $posting = $this->getActivePosting($user);
+        $posting = $this->getActivePosting($userData);
 
-        if (!$posting || !$posting->post) {
+        if (!$posting) {
             return $managers;
         }
 
         $currentPost = $posting->post;
-        $organisationUnitId = $posting->organisation_unit_id;
+        $organisationUnitId = $posting->organisationUnitId;
 
-        while ($currentPost && $currentPost->reports_to_post_id) {
-            $parentPost = $this->posting->newQuery()
-                ->where('post_id', $currentPost->reports_to_post_id)
-                ->first()?->post;
+        while ($currentPost && $currentPost->reportsToPostId) {
+            $parentPost = $this->post->newQuery()->find($currentPost->reportsToPostId);
 
             if (!$parentPost) {
                 break;
             }
+
+            $parentPost = PostData::from($parentPost);
 
             $users = $this->getActivePostingsForPostInUnit($parentPost->id, $organisationUnitId)
                 ->pluck('user')
@@ -81,11 +85,19 @@ final readonly class ManagerHierarchyPolicy
     /**
      * Get the user's active posting (latest start_date, end_date null or in future).
      */
-    private function getActivePosting(UserData $userData): ?Posting
+    public function getActivePosting(UserData $userData): ?PostingData
     {
-        $user = $this->user->findOrFail($userData->id);
+        $posting = $this->posting->newQuery()
+            ->where('user_id', $userData->id)
+            ->active()
+            ->latest('start_date')
+            ->first();
 
-        return $user->postings()->active()->latest('start_date')->first();
+        if ($posting) {
+            $posting->load('post');
+        }
+
+        return $posting ? PostingData::from($posting) : null;
     }
 
     /**

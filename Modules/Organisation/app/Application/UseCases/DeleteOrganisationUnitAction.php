@@ -4,7 +4,7 @@ namespace Modules\Organisation\Application\UseCases;
 
 use Modules\Organisation\Models\OrganisationUnit;
 
-class DeleteOrganisationUnitAction
+final readonly class DeleteOrganisationUnitAction
 {
     public function __construct(private OrganisationUnit $model)
     {

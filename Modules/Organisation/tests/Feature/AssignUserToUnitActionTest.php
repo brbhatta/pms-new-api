@@ -10,7 +10,6 @@ uses(Modules\Organisation\Tests\TestCase::class);
 
 it('creates a posting for a user to a post within a unit', function () {
     $unit = OrganisationUnit::factory()->create();
-    $actor = User::factory()->create();
     $user = User::factory()->create();
 
     $post = Post::factory()->create([
@@ -19,8 +18,7 @@ it('creates a posting for a user to a post within a unit', function () {
         'level' => 1,
     ]);
 
-    $result = resolve(AssignUserToUnitAction::class)
-        ->handle($actor->id, $user->id, $unit->id, $post);
+    $result = resolve(AssignUserToUnitAction::class)->handle($user->id, $unit->id, $post);
 
     expect($result)->toBeTrue();
 

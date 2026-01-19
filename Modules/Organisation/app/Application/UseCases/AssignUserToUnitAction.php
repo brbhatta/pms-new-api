@@ -8,7 +8,7 @@ use Modules\User\Models\User;
 use Modules\Organisation\Models\Post;
 use Modules\Organisation\Models\Posting;
 
-class AssignUserToUnitAction
+final readonly class AssignUserToUnitAction
 {
     public function __construct(
         private OrganisationUnit $unitModel,
@@ -21,7 +21,6 @@ class AssignUserToUnitAction
     /**
      * Create a Posting (assignment of a user to a post within a unit).
      *
-     * @param  string  $actorId
      * @param  string  $userId
      * @param  string  $unitId
      * @param  Post|null  $post
@@ -31,7 +30,6 @@ class AssignUserToUnitAction
      * @return bool
      */
     public function handle(
-        string $actorId,
         string $userId,
         string $unitId,
         ?Post $post,

@@ -6,7 +6,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Modules\Organisation\Http\Data\OrganisationUnitData;
 use Modules\Organisation\Models\OrganisationUnit;
 
-class GetPaginatedOrganisationUnits
+final readonly class GetPaginatedOrganisationUnits
 {
     public function __construct(private OrganisationUnit $model)
     {

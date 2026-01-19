@@ -5,7 +5,7 @@ namespace Modules\Organisation\Application\UseCases;
 use Modules\Organisation\Http\Data\OrganisationUnitData;
 use Modules\Organisation\Models\OrganisationUnit;
 
-class CreateOrganisationUnitAction
+final readonly class CreateOrganisationUnitAction
 {
     public function __construct(private OrganisationUnit $model)
     {

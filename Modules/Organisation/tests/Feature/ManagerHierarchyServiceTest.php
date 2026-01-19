@@ -1,14 +1,14 @@
 <?php
 
+use Modules\Organisation\Application\Services\ManagerHierarchyService;
 use Modules\Organisation\Database\Seeders\PostsSeeder;
 use Modules\Organisation\Http\Data\OrganisationUnitData;
-use Modules\Organisation\Policies\ManagerHierarchyPolicy;
-use Modules\Organisation\Models\Post;
+use Modules\Organisation\Http\Enums\PostType;
 use Modules\Organisation\Models\OrganisationUnit;
+use Modules\Organisation\Models\Post;
 use Modules\Organisation\Models\Posting;
 use Modules\User\Http\Data\UserData;
 use Modules\User\Models\User;
-use Modules\Organisation\Http\Enums\PostType;
 
 uses(Modules\Organisation\Tests\TestCase::class);
 
@@ -43,7 +43,7 @@ it('returns immediate manager for a user within same unit', function () {
         'end_date' => null,
     ]);
 
-    $immediate = resolve(ManagerHierarchyPolicy::class)->immediateManagers($employee);
+    $immediate = resolve(ManagerHierarchyService::class)->immediateManagers($employee);
 
     expect($immediate)->toBeInstanceOf(Illuminate\Support\Collection::class);
     expect($immediate->first()->id)->toBe($manager->id);
@@ -94,7 +94,7 @@ it('returns full manager chain in order', function () {
         'end_date' => null,
     ]);
 
-    $all = resolve(ManagerHierarchyPolicy::class)->allManagers($employee);
+    $all = resolve(ManagerHierarchyService::class)->allManagers($employee);
 
     expect($all->pluck('id')->toArray())->toBe([
         $managers[0]->id,
