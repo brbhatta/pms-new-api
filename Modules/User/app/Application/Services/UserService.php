@@ -2,25 +2,64 @@
 
 namespace Modules\User\Application\Services;
 
-use Modules\User\Application\Contracts\UserInterface;
-use Modules\User\Domain\Models\User;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Modules\User\Application\Contracts\UserServiceInterface;
+use Modules\User\Application\Exceptions\UserNotFoundException;
+use Modules\User\Application\UseCases\CreateUserAction;
+use Modules\User\Application\UseCases\DeleteUserAction;
+use Modules\User\Application\UseCases\GetPaginatedUsers;
+use Modules\User\Application\UseCases\GetUserAction;
+use Modules\User\Application\UseCases\UpdateUserAction;
+use Modules\User\Http\Data\UserData;
 
-class UserService implements UserInterface
+final readonly class UserService implements UserServiceInterface
 {
-    public function createUser(array $data): User
-    {
-        return User::create($data);
+    public function __construct(
+        private GetUserAction $getUserAction,
+        private GetPaginatedUsers $getPaginatedUsers,
+        private CreateUserAction $createUserAction,
+        private UpdateUserAction $updateUserAction,
+        private DeleteUserAction $deleteUserAction,
+    ) {
     }
 
-    public function assignRoleToUser(int $userId, int $roleId): bool
+    public function findByUserId(string $userId): UserData
     {
-        $user = User::findOrFail($userId);
-        $user->roles()->attach($roleId);
-        return true;
+        return $this->getUserById($userId) ?? throw new UserNotFoundException($userId);
     }
 
-    public function getUserById(int $id): ?User
+    /**
+     * @param  string  $userId
+     * @return UserData|null
+     */
+    public function getUserById(string $userId): ?UserData
     {
-        return User::find($id);
+        try {
+            return $this->getUserAction->handle($userId);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    public function createUser(UserData $data): UserData
+    {
+        return $this->createUserAction->handle($data, collect());
+    }
+
+    public function updateUser(string $userId, UserData $data): UserData
+    {
+        return $this->updateUserAction->handle($userId, $data);
+    }
+
+    public function deleteUser(string $userId): bool
+    {
+        $userData = $this->findByUserId($userId);
+
+        return $this->deleteUserAction->handle($userData);
+    }
+
+    public function getPaginatedUsers(): LengthAwarePaginator
+    {
+        return $this->getPaginatedUsers->handle();
     }
 }

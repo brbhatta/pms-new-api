@@ -3,23 +3,34 @@
 namespace Modules\User\Application\Console;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Hash;
-use Modules\User\Entities\User;
+use Modules\User\Application\UseCases\CreateUserAction;
+use Modules\User\Http\Data\UserData;
 
 class CreateUserCommand extends Command
 {
     protected $signature = 'user:create {name} {email} {password}';
     protected $description = 'Create a new internal user';
 
+    public function __construct(
+        private readonly CreateUserAction $action
+    ) {
+        parent::__construct();
+    }
+
+    /**
+     * @throws \Throwable
+     */
     public function handle(): void
     {
-        $user = User::create([
+        $userData = UserData::from([
             'name' => $this->argument('name'),
             'email' => $this->argument('email'),
-            'password' => Hash::make($this->argument('password')),
+            'password' => $this->argument('password'),
         ]);
 
-        $this->info('User created: ' . $user->id);
+        $user = $this->action->handle($userData);
+
+        $this->info("User {$user->name} with email {$user->email} created successfully.");
     }
 }
 

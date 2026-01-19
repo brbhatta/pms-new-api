@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\User\Events;
+namespace Modules\User\Http\Events;
 
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -11,6 +11,5 @@ class UserProfileCreated
 
     public function __construct(
         public string $userId,
-        public array $profileData
     ) {}
 }

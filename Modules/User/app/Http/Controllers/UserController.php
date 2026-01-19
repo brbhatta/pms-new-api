@@ -3,59 +3,77 @@
 namespace Modules\User\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\GenericResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Modules\User\Application\Contracts\UserServiceInterface;
+use Modules\User\Application\Exceptions\UserNotFoundException;
+
+use Modules\User\Http\Data\UserData;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        return view('user::index');
+    public function __construct(
+        private readonly UserServiceInterface $userService,
+    ) {
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display a listing of the resource.
      */
-    public function create()
+    public function index(): JsonResource
     {
-        return view('user::create');
+        $data = $this->userService->getPaginatedUsers();
+
+        return GenericResponse::collection($data);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {}
-
-    public function currentUser()
+    public function store(Request $request)
     {
-        return auth()->user();
-    }
+        $data = UserData::from($request->all());
 
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('user::show');
-    }
+        $result = $this->userService->createUser($data);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('user::edit');
+        return GenericResponse::resource($result);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id) {}
+    public function update(Request $request, $id)
+    {
+        $data = UserData::from($request->all());
+
+        $result = $this->userService->updateUser($id, $data);
+
+        return GenericResponse::resource($result);
+    }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id) {}
+    public function destroy($id)
+    {
+        $result = $this->userService->deleteUser($id);
+
+        if (!$result) {
+            GenericResponse::failed("FAILED.TO.DELETE.USER", "Failed to delete user.");
+        }
+
+        return GenericResponse::success("User deleted successfully.");
+    }
+
+    public function currentUser(): UserData
+    {
+        $result = $this->userService->getUserById(auth()->id());
+
+        if ($result === null) {
+            throw new UserNotFoundException(auth()->id());
+        }
+
+        return $result;
+    }
 }

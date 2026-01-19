@@ -3,13 +3,16 @@
 namespace Modules\User\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\GenericResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
-use Modules\User\Domain\Models\User;
+use Modules\User\Application\Contracts\AuthServiceInterface;
 
-class AuthController extends Controller
+final  class AuthController extends Controller
 {
+    public function __construct(
+        private readonly AuthServiceInterface $authService
+    ) {}
+
     public function login(Request $request)
     {
         $request->validate([
@@ -17,15 +20,7 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = $this->authService->login($request->email, $request->password);
 
         return response()->json([
             'accessToken' => $token,
@@ -33,9 +28,11 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logged out successfully']);
+        $actorId = (string) auth()->id();
+        $this->authService->logout($actorId);
+
+        return GenericResponse::success("Successfully logged out.");
     }
 }
