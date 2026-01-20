@@ -12,13 +12,15 @@ use Modules\Organisation\Http\Requests\AssignUserToUnitRequest;
 
 class OrganisationUnitController extends Controller
 {
-    public function __construct(private readonly OrganisationUnitServiceInterface $service)
-    {
+    public function __construct(
+        private readonly OrganisationUnitServiceInterface $service
+    ) {
     }
 
     public function index(): JsonResource
     {
         $data = $this->service->getPaginatedUnits();
+
         return GenericResponse::collection($data);
     }
 
@@ -26,12 +28,14 @@ class OrganisationUnitController extends Controller
     {
         $data = OrganisationUnitData::from($request->all());
         $result = $this->service->createUnit($data);
+
         return GenericResponse::resource($result);
     }
 
     public function show(string $id)
     {
         $result = $this->service->getUnitById($id);
+
         return GenericResponse::resource($result);
     }
 
@@ -39,12 +43,14 @@ class OrganisationUnitController extends Controller
     {
         $data = OrganisationUnitData::from($request->all());
         $result = $this->service->updateUnit($id, $data);
+
         return GenericResponse::resource($result);
     }
 
     public function destroy(string $id)
     {
         $this->service->deleteUnit($id);
+
         return GenericResponse::success();
     }
 
