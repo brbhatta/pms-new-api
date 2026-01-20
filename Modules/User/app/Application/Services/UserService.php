@@ -23,6 +23,10 @@ final readonly class UserService implements UserServiceInterface
     ) {
     }
 
+    /**
+     * @param  string  $userId
+     * @return UserData
+     */
     public function findByUserId(string $userId): UserData
     {
         return $this->getUserById($userId) ?? throw new UserNotFoundException($userId);

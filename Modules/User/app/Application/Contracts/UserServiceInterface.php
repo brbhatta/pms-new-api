@@ -36,4 +36,10 @@ interface UserServiceInterface
      * @return UserData|null
      */
     public function getUserById(string $userId): ?UserData;
+
+    /**
+     * @param  string  $userId
+     * @return UserData
+     */
+    public function findByUserId(string $userId): UserData;
 }

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Organisation\Application\Contracts\OrganisationUnitServiceInterface;
 use Modules\Organisation\Http\Data\OrganisationUnitData;
+use Modules\Organisation\Http\Requests\AssignUserToUnitRequest;
 
 class OrganisationUnitController extends Controller
 {
@@ -45,5 +46,14 @@ class OrganisationUnitController extends Controller
     {
         $this->service->deleteUnit($id);
         return GenericResponse::success();
+    }
+
+    public function assignUserToUnit(string $unitId, string $userId, AssignUserToUnitRequest $request)
+    {
+        $postId = $request->input('post_id');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $this->service->assignUserToUnit($userId, $unitId, $postId, $startDate, $endDate);
     }
 }

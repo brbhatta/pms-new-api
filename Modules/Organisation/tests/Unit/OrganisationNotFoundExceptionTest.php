@@ -1,6 +1,6 @@
 <?php
 
-use Modules\Organisation\Application\Exceptions\OrganisationNotFoundException;
+use Modules\Organisation\Application\Exceptions\UnitNotFoundException;
 use App\Exceptions\ApplicationException;
 use Psr\Log\LogLevel;
 
@@ -9,7 +9,7 @@ uses(Modules\Organisation\Tests\TestCase::class);
 it('has correct properties and inherits from ApplicationException', function () {
     $orgId = 'non-existent-id';
 
-    $exception = new OrganisationNotFoundException($orgId);
+    $exception = new UnitNotFoundException($orgId);
 
     expect($exception)->toBeInstanceOf(ApplicationException::class);
     expect($exception->getHttpStatusCode())->toBe(404);

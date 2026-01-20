@@ -28,6 +28,7 @@
             <directory>Modules/*/database</directory>
             <directory>Modules/*/app/Providers</directory>
             <directory>Modules/*/app/Application/Services</directory>
+            <directory>Modules/*/app/Http/Requests</directory>
         </exclude>
     </source>
     <php>

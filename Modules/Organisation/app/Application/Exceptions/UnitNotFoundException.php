@@ -7,7 +7,7 @@ use Illuminate\Http\Response;
 use Psr\Log\LogLevel;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
-class OrganisationNotFoundException extends ApplicationException
+class UnitNotFoundException extends ApplicationException
 {
     public function __construct(string $organisationId)
     {

@@ -6,6 +6,10 @@ use App\Utils\Traits\RegistersConfig;
 use App\Utils\Traits\RegistersMigrations;
 use App\Utils\Traits\RegistersTranslation;
 use Illuminate\Support\ServiceProvider;
+use Modules\Organisation\Application\Contracts\ManagerHierarchyServiceInterface;
+use Modules\Organisation\Application\Contracts\PostServiceInterface;
+use Modules\Organisation\Application\Services\ManagerHierarchyService;
+use Modules\Organisation\Application\Services\PostService;
 use Nwidart\Modules\Traits\PathNamespace;
 use Modules\Organisation\Application\Contracts\OrganisationUnitServiceInterface;
 use Modules\Organisation\Application\Services\OrganisationUnitService;
@@ -20,6 +24,8 @@ class OrganisationServiceProvider extends ServiceProvider
 
     protected array $interfaceBinding = [
         OrganisationUnitServiceInterface::class => OrganisationUnitService::class,
+        PostServiceInterface::class => PostService::class,
+        ManagerHierarchyServiceInterface::class => ManagerHierarchyService::class,
     ];
 
     /**
